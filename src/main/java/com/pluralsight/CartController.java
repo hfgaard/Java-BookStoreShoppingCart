@@ -43,8 +43,11 @@ public class CartController extends HttpServlet {
 		try {
 			switch(action) {
 				case "/addcart":
-					 addToCart(request, response);
-           break;
+					addToCart(request, response);
+           			break;
+				case "/delete":
+					deleteFromCart(request, response);
+					break;
         default:
            break;
 			}
@@ -56,32 +59,40 @@ public class CartController extends HttpServlet {
 		response.sendRedirect("../ShoppingCart.jsp");
 	}
 
-  protected void addToCart(HttpServletRequest request, HttpServletResponse response)
+	protected void addToCart(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
-   HttpSession session = request.getSession();
-   String idStr = request.getParameter("id");
-   int id = Integer.parseInt(idStr);
-   String quantityStr = request.getParameter("quantity");
-   int quantity = Integer.parseInt(quantityStr);
+		HttpSession session = request.getSession();
+		String idStr = request.getParameter("id");
+		int id = Integer.parseInt(idStr);
+		String quantityStr = request.getParameter("quantity");
+		int quantity = Integer.parseInt(quantityStr);
 
-	 // Get the book from the database
-   Book existingBook = bookDAO.getBook(id);
+		 // Get the book from the database
+		Book existingBook = bookDAO.getBook(id);
 
-	 // Check if a ShoppingCart exists in the Session variable
-	 // If not create one
-   ShoppingCart shoppingCart = null;
-   Object objCartBean = session.getAttribute("cart");
+		 // Check if a ShoppingCart exists in the Session variable
+		 // If not create one
+		ShoppingCart shoppingCart = null;
+		Object objCartBean = session.getAttribute("cart");
 
-   if(objCartBean!=null) {
-    shoppingCart = (ShoppingCart) objCartBean ;
-   } else {
-    shoppingCart = new ShoppingCart();
-    session.setAttribute("cart", shoppingCart);
-   }
+		if(objCartBean!=null) {
+		shoppingCart = (ShoppingCart) objCartBean ;
+		} else {
+		shoppingCart = new ShoppingCart();
+		session.setAttribute("cart", shoppingCart);
+		}
 
-	 // Add this item and quantity to the ShoppingCart
-   shoppingCart.addCartItem(existingBook, quantity);
-  }
+		 // Add this item and quantity to the ShoppingCart
+		shoppingCart.addCartItem(existingBook, quantity);
+  	}
+
+	private void deleteFromCart(HttpServletRequest request, HttpServletResponse response)
+		throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		int index = Integer.parseInt(request.getParameter("index"));
+		ShoppingCart shoppingCart = (ShoppingCart)session.getAttribute("cart");
+		shoppingCart.deleteCartItem(index);
+	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doGet(request, response);
